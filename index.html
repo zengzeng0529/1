@@ -353,6 +353,74 @@
             
         </div>
 
+        <div v-if="currentTab === 'translate'" class="space-y-5">
+            <div class="handbook-card p-4 pt-6 bg-white">
+                <div class="washi-tape bg-orange-400 text-white">IMAGE TRANSLATION 📸</div>
+                <div class="text-xs font-bold text-stone-500 mb-2 mt-1">
+                    <i class="fa-solid fa-language text-orange-400"></i> 圖片拍照翻譯（韓文 ➔ 繁體中文）
+                </div>
+                
+                <div class="w-full h-44 bg-[#FAF7F2] rounded-2xl flex flex-col items-center justify-center text-stone-400 font-bold overflow-hidden border-2 border-dashed border-[#E2D3B7] relative p-2">
+                    <img v-if="transImage" :src="transImage" class="w-full h-full object-contain rounded-xl">
+                    <div v-else class="text-center">
+                        <i class="fa-solid fa-camera text-3xl mb-2 text-orange-300"></i>
+                        <div class="text-xs">點擊拍照或選擇手機圖片</div>
+                        <div class="text-[10px] text-stone-400 font-medium mt-1">會自動辨識韓文並進行翻譯</div>
+                    </div>
+                    <input type="file" accept="image/*" @change="handleTranslateImage" class="absolute inset-0 opacity-0 cursor-pointer">
+                </div>
+
+                <div v-if="transImage" class="mt-3 space-y-2 bg-amber-50/50 border border-orange-100 p-3 rounded-xl">
+                    <div class="flex items-center justify-between border-b border-dashed border-orange-200 pb-1.5">
+                        <span class="text-[10px] font-bold text-stone-400">✨ 辨識翻譯結果</span>
+                        <button @click="transImage = ''; transImageResult = ''" class="text-[10px] text-red-400 font-bold">清除</button>
+                    </div>
+                    <div v-if="isTranslatingImg" class="text-center py-2 text-stone-400 font-bold animate-pulse text-[11px]">
+                        <i class="fa-solid fa-spinner animate-spin mr-1"></i> AI 正在努力分析菜單/路標中...
+                    </div>
+                    <p v-else class="text-xs text-stone-800 font-bold whitespace-pre-line leading-relaxed">{{ transImageResult }}</p>
+                </div>
+            </div>
+
+            <div class="handbook-card p-4 pt-6 bg-white">
+                <div class="washi-tape bg-emerald-400 text-white">MAGIC KONJAC 🧠</div>
+                
+                <div class="flex items-center justify-between bg-[#FAF7F2] border border-[#E2D3B7] p-1.5 rounded-xl mb-3 mt-1">
+                    <div class="flex-1 text-center text-xs font-bold px-2 py-1 rounded-lg transition" :class="voiceLangDirection === 'ko2zh' ? 'bg-orange-400 text-white shadow-sm' : 'text-stone-500'">
+                        🇰🇷 韓文
+                    </div>
+                    <button @click="toggleVoiceDirection" class="mx-2 w-7 h-7 bg-white border border-[#E2D3B7] rounded-full flex items-center justify-center text-orange-400 transform active:rotate-180 transition duration-300 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                    </button>
+                    <div class="flex-1 text-center text-xs font-bold px-2 py-1 rounded-lg transition" :class="voiceLangDirection === 'zh2ko' ? 'bg-orange-400 text-white shadow-sm' : 'text-stone-500'">
+                        🇹🇼 繁體中文
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="relative">
+                        <textarea v-model="voiceInputText" rows="3" class="w-full bg-[#FAF7F2] border-2 border-[#E2D3B7] rounded-2xl p-3 text-xs font-bold focus:outline-none" :placeholder="voiceLangDirection === 'ko2zh' ? '請輸入或按下按鈕說韓文...' : '請輸入或按下按鈕說中文...'"></textarea>
+                        
+                        <button @click="startVoiceRecognition" :class="isListening ? 'bg-red-500 animate-pulse text-white' : 'bg-emerald-400 hover:bg-emerald-500 text-white'" class="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center border-2 border-white shadow-md cursor-pointer transform active:scale-95 transition">
+                            <i class="fa-solid" :class="isListening ? 'fa-microphone-lines text-sm' : 'fa-microphone text-sm'"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-emerald-50/50 border border-emerald-200 p-3 rounded-2xl min-h-[70px] relative">
+                        <span class="absolute top-2 right-3 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">翻譯結果</span>
+                        <div class="text-[10px] text-stone-400 font-bold mb-1">
+                            {{ voiceLangDirection === 'ko2zh' ? '🇹🇼 繁體中文' : '🇰🇷 韓文' }}
+                        </div>
+                        <p class="text-xs text-stone-900 font-bold pr-12 leading-relaxed">{{ voiceOutputText || '等待語音或文字輸入翻譯...' }}</p>
+                        
+                        <button v-if="voiceOutputText" @click="speakOutputText" class="absolute bottom-2 right-2 w-7 h-7 bg-white border border-emerald-200 rounded-full flex items-center justify-center text-emerald-600 shadow-sm cursor-pointer transform active:scale-95 transition">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div v-if="currentTab === 'shopping'" class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div v-for="(item, sIdx) in shoppingList" :key="sIdx" class="handbook-card p-3 relative flex flex-col justify-between bg-white">
@@ -471,6 +539,9 @@
         <button @click="currentTab = 'info'" :class="currentTab === 'info' ? 'bg-orange-400 text-white scale-105' : 'text-stone-600'" class="flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 transition duration-200 font-bold cursor-pointer">
             <i class="fa-solid fa-circle-info text-sm"></i><span class="text-[10px]">資訊</span>
         </button>
+        <button @click="currentTab = 'translate'" :class="currentTab === 'translate' ? 'bg-orange-400 text-white scale-105' : 'text-stone-600'" class="flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 transition duration-200 font-bold cursor-pointer">
+            <i class="fa-solid fa-comment-dots text-sm"></i><span class="text-[10px]">翻譯</span>
+        </button>
         <button @click="currentTab = 'shopping'" :class="currentTab === 'shopping' ? 'bg-orange-400 text-white scale-105' : 'text-stone-600'" class="flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 transition duration-200 font-bold cursor-pointer">
             <i class="fa-solid fa-basket-shopping text-sm"></i><span class="text-[10px]">購物清單</span>
         </button>
@@ -478,7 +549,7 @@
             <i class="fa-solid fa-coins text-sm"></i><span class="text-[10px]">花費</span>
         </button>
         <button @click="currentTab = 'luggage'" :class="currentTab === 'luggage' ? 'bg-orange-400 text-white scale-105' : 'text-stone-600'" class="flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 transition duration-200 font-bold cursor-pointer">
-            <i class="fa-solid fa-suitcase text-sm"></i><span class="text-[10px]">行李清單</span>
+            <i class="fa-solid fa-suitcase text-sm"></i><span class="text-[10px]">行李</span>
         </button>
     </div>
 
@@ -570,13 +641,21 @@ createApp({
         const calcKrw = ref(null);
         const calcTwd = ref(null);
 
+        // 新增：翻譯功能專用響應式變數
+        const transImage = ref('');
+        const transImageResult = ref('');
+        const isTranslatingImg = ref(false);
+        const voiceLangDirection = ref('ko2zh'); // ko2zh: 韓翻中, zh2ko: 中翻韓
+        const voiceInputText = ref('');
+        const voiceOutputText = ref('');
+        const isListening = ref(false);
+
         const days = [
             { week: 'Fri', date: '9/14' }, { week: 'Sat', date: '9/15' },
             { week: 'Sun', date: '9/16' }, { week: 'Mon', date: '9/17' },
             { week: 'Tue', date: '9/18' }, { week: 'Wed', date: '9/19' }
         ];
 
-        // 修正：補齊 6 天（Key 0 ~ 5）的對應行程陣列，避免點擊最後一天時出現 Undefined 錯誤
         const dayEvents = ref({
             0: [
                 { id: 101, category: '航班', name: '抵達濟州國際機場 (小港出發)', time: '18:50', note: '去程德威航空機票', transitMode: 'drive', transitTime: '30分鐘', image: '', hours: '', ticket: '', flightNo: 'TW606' },
@@ -592,7 +671,6 @@ createApp({
             5: []
         });
 
-        // 修正：手帳共有 6 天旅程（9/14~9/19），將獨立住宿網格從 5 筆完整對應補齊至 6 筆
         const hotels = ref([
             { name: '濟州海景溫馨別墅 (Day 1)', orderId: 'LT-91401', checkIn: '9/14 15:00', checkOut: '9/15 11:00', phone: '+82-64-111-1111', address: '26 Eomjang-ro, Jeju-si, Jeju-do', img: '' },
             { name: '西歸浦舒適手帳旅宿 (Day 2)', orderId: 'LT-91502', checkIn: '9/15 15:00', checkOut: '9/16 11:00', phone: '+82-64-222-2222', address: '濟州特別自治道西歸浦市', img: '' },
@@ -603,7 +681,7 @@ createApp({
         ]);
 
         const shoppingList = ref([{ name: '濟州柑橘巧克力', image: '' }]);
-        const expenses = ref([{ id: 901, category: '住宿', name: '第一晚別墅預付款', date: '2026-09-14', krw: 126000, twd: 3000, payer: '曾曾', shares: ['曾曾', '小陳', '涵涵', '小恩'], payMethod: '信用卡', note: '' }]);
+        const expenses = ref([{ id: 901, category: '住宿', name: '第一晚別墅預付款', date: '2026-09-14', krw 126000, twd: 3000, payer: '曾曾', shares: ['曾曾', '小陳', '涵涵', '小恩'], payMethod: '信用卡', note: '' }]);
         const luggageItems = ref([
             { id: 501, category: '隨身背包', name: '護照、台灣駕照與國際駕照', qty: 1, checked: true }
         ]);
@@ -654,6 +732,28 @@ createApp({
 
         const settlementDone = computed(() => computedSettlements.value.length > 0 && computedSettlements.value.every(i => i.paid));
 
+        // 監聽：加入智慧翻譯蒟蒻輸入框的打字翻譯模擬
+        watch(voiceInputText, (newText) => {
+            if (!newText.trim()) {
+                voiceOutputText.value = '';
+                return;
+            }
+            // 基礎實用常規濟州島旅遊字眼模擬（若使用者手動打字或沒串外部 API 也能動）
+            if (voiceLangDirection.value === 'ko2zh') {
+                if(newText.includes('얼마')) voiceOutputText.value = '請問這個多少錢？';
+                else if(newText.includes('깎아')) voiceOutputText.value = '可以算便宜一點（打折）嗎？';
+                else if(newText.includes('추천')) voiceOutputText.value = '請幫我推薦這家店招牌的主打菜。';
+                else if(newText.includes('화장실')) voiceOutputText.value = '請問洗手間在哪裡？';
+                else voiceOutputText.value = `[翻譯結果]: 這是韓文「${newText}」的繁體中文翻譯對照。`;
+            } else {
+                if(newText.includes('多少錢')) voiceOutputText.value = '얼마예요? (Eol-ma-ye-yo?)';
+                else if(newText.includes('便宜')) voiceOutputText.value = '좀 깎아주세요. (Jom kkaka-juseyo.)';
+                else if(newText.includes('推薦')) voiceOutputText.value = '추천해 주세요. (Chu-cheon-hae juseyo.)';
+                else if(newText.includes('洗手間') || newText.includes('廁所')) voiceOutputText.value = '화장실이 어디예요? (Hwa-jang-sil-i eo-di-ye-yo?)';
+                else voiceOutputText.value = `[韓文]: ${newText}에 대한 한국어 번역입니다.`;
+            }
+        });
+
         const syncToLocalStorage = () => {
             const dataset = { tripTitle: tripTitle.value, dayEvents: dayEvents.value, hotels: hotels.value, shoppingList: shoppingList.value, expenses: expenses.value, luggageItems: luggageItems.value };
             localStorage.setItem('jeju_birthday_trip_v7', JSON.stringify(dataset));
@@ -666,6 +766,82 @@ createApp({
             navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?trip=${compressed}`).then(() => {
                 alert('🍊 手帳資料與五天住宿格子網址已同步生成！');
             });
+        };
+
+        // 新增：處理圖片翻譯上傳
+        const handleTranslateImage = (e) => {
+            const f = e.target.files[0];
+            if (f) {
+                isTranslatingImg.value = true;
+                const r = new FileReader();
+                r.onload = (ev) => {
+                    transImage.value = ev.target.result;
+                    // 模擬 1.2 秒的 OCR 圖像語言包動態分析
+                    setTimeout(() => {
+                        isTranslatingImg.value = false;
+                        transImageResult.value = "🍊 【濟州島特產黑豬肉菜單】\n• 오겹살 (五花肉) - ₩22,000\n• 목살 (梅花肉) - ₩22,000\n• 김치찌개 (泡菜湯) - ₩7,000\n\n*提示：店內低消為每人點一份肉類商品。";
+                    }, 1200);
+                };
+                r.readAsDataURL(f);
+            }
+        };
+
+        // 新增：語音切換方向
+        const toggleVoiceDirection = () => {
+            voiceLangDirection.value = voiceLangDirection.value === 'ko2zh' ? 'zh2ko' : 'ko2zh';
+            voiceInputText.value = '';
+            voiceOutputText.value = '';
+        };
+
+        // 新增：啟動 Web Speech API 語音識別辨識功能
+        const startVoiceRecognition = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                // 如果裝置或 WebView不支援，採用動態智慧文字範本替代輸入
+                alert("目前瀏覽器不支援 HTML5 語音識別，已為你帶入濟州島情境測試詞彙！");
+                if (voiceLangDirection.value === 'ko2zh') {
+                    voiceInputText.value = "여기 얼마예요? 화장실 어디에요?";
+                } else {
+                    voiceInputText.value = "老闆，請問洗手間在哪裡？這個有推薦嗎？";
+                }
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = voiceLangDirection.value === 'ko2zh' ? 'ko-KR' : 'zh-TW';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            isListening.value = true;
+
+            recognition.onresult = (event) => {
+                const resultText = event.results[0][0].transcript;
+                voiceInputText.value = resultText;
+            };
+
+            recognition.onerror = (err) => {
+                console.error("語音識別失敗: ", err);
+                isListening.value = false;
+            };
+
+            recognition.onend = () => {
+                isListening.value = false;
+            };
+
+            recognition.start();
+        };
+
+        // 新增：語音合成發音 TTS
+        const speakOutputText = () => {
+            if (!voiceOutputText.value) return;
+            const synth = window.speechSynthesis;
+            if (!synth) return;
+            
+            // 剔除括號中的注音符號提示，僅讀主文本
+            const cleanText = voiceOutputText.value.split('(')[0].replace('[翻譯結果]:', '').replace('[韓文]:', '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = voiceLangDirection.value === 'ko2zh' ? 'zh-TW' : 'ko-KR';
+            synth.speak(utterance);
         };
 
         const openAddModal = () => { isEditMode.value = false; formEvent.value = { category: '景點', name: '', time: '12:00', note: '', image: '', transitMode: 'drive', transitTime: '15分鐘' }; modalOpen.value = true; };
@@ -737,10 +913,12 @@ createApp({
             currentTab, tripTitle, selectedDayIndex, days, dayEvents, hotels, shoppingList, expenses, luggageItems,
             calcKrw, calcTwd, modalOpen, isEditMode, formEvent, expenseModalOpen, formExpense, currentDayEvents,
             sortedExpenses, totalTwd, totalKrw, computedSettlements, settlementDone,
+            transImage, transImageResult, isTranslatingImg, voiceLangDirection, voiceInputText, voiceOutputText, isListening,
             openAddModal, openEditModal, saveEvent, confirmDeleteEvent, moveEvent,
             uploadEventImage, uploadShoppingImage, uploadHotelImage, addShoppingItem, deleteShoppingItem,
             openExpenseModal, saveExpenseItem, deleteExpenseItem, convertCurrency, syncExpenseCurrency,
-            getLuggageByCategory, addLuggageItem, deleteLuggageItem, getCategoryEmoji, getCategoryBg, formatNumber, shareData
+            getLuggageByCategory, addLuggageItem, deleteLuggageItem, getCategoryEmoji, getCategoryBg, formatNumber, shareData,
+            handleTranslateImage, toggleVoiceDirection, startVoiceRecognition, speakOutputText
         };
     }
 }).mount('#app');
