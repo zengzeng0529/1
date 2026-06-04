@@ -186,7 +186,7 @@
                                     </span>
                                     <span class="text-xs text-stone-400 font-bold"><i class="fa-regular fa-clock"></i> {{ event.time }}</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-stone-900 mt-1 truncate">{{ event.name }}</h4>
+                                <h4 class="font-bold text-sm text-stone-990 mt-1 truncate">{{ event.name }}</h4>
                                 
                                 <div class="flex flex-wrap gap-x-2.5 mt-1 text-[11px] text-stone-500">
                                     <span v-if="event.hours"><i class="fa-regular fa-calendar-check"></i> {{ event.hours }}</span>
@@ -278,7 +278,7 @@
                     <div class="flex justify-between"><span>車型款式：</span><span class="text-stone-600 font-bold">現代 Avante (或同級五人座)</span></div>
                     <div class="flex justify-between"><span>取還時間：</span><span class="text-stone-600 font-bold">9/14 20:00 ~ 9/19 08:00</span></div>
                     <div class="flex justify-between"><span>訂單號碼：</span><span class="text-amber-700 font-bold">LT-20260914-885A</span></div>
-                    <a href="https://map.naver.com/v5/search/%E4%B9%90%E5%A4%A9%E7%A7%9F%E8%BD%A6%E6%B5%8E%E5%B7%9E" target="_blank" class="block w-full bg-sky-50 text-sky-700 font-bold py-1.5 rounded-xl text-center text-[11px] border border-sky-200 mt-2"><i class="fa-solid fa-car-tunnel"></i> Naver Map</a>
+                    <a href="https://map.naver.com/v5/search/%E4%B9%90%E4%B9%9B%E7%A7%9F%E8%BD%A6%E6%B5%8E%E5%B7%9E" target="_blank" class="block w-full bg-sky-50 text-sky-700 font-bold py-1.5 rounded-xl text-center text-[11px] border border-sky-200 mt-2"><i class="fa-solid fa-car-tunnel"></i> Naver Map</a>
                 </div>
             </div>
 
@@ -681,7 +681,7 @@ createApp({
         ]);
 
         const shoppingList = ref([{ name: '濟州柑橘巧克力', image: '' }]);
-        const expenses = ref([{ id: 901, category: '住宿', name: '第一晚別墅預付款', date: '2026-09-14', krw 126000, twd: 3000, payer: '曾曾', shares: ['曾曾', '小陳', '涵涵', '小恩'], payMethod: '信用卡', note: '' }]);
+        const expenses = ref([{ id: 901, category: '住宿', name: '第一晚別墅預付款', date: '2026-09-14', krw: 126000, twd: 3000, payer: '曾曾', shares: ['曾曾', '小陳', '涵涵', '小恩'], payMethod: '信用卡', note: '' }]);
         const luggageItems = ref([
             { id: 501, category: '隨身背包', name: '護照、台灣駕照與國際駕照', qty: 1, checked: true }
         ]);
